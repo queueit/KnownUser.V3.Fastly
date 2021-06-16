@@ -1,0 +1,7 @@
+build
+.idea
+node_modules
+**.wat
+**.map
+**.tar.gz
+**.wasm

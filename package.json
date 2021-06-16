@@ -1,0 +1,40 @@
+{
+  "name": "@queue-it/fastly",
+  "version": "3.6.1",
+  "description": "Queue-it connector for Fastly",
+  "main": "assembly/index.ts",
+  "ascMain": "assembly/index.ts",
+  "author": "devs@queue-it.com",
+  "repository": "https://github.com/queueit/KnownUser.V3.Fastly",
+  "license": "MIT",
+  "files": [
+    "package.json",
+    "README.md",
+    "assembly/sdk",
+    "assembly/contextProvider.ts",
+    "assembly/helper.ts",
+    "assembly/integrationConfigProvider.ts",
+    "assembly/requestResponseHandler.ts",
+    "assembly/index.ts"
+  ],
+  "scripts": {
+    "test": "npx asp --config assembly/__tests__/as-pect.config.js --verbose",
+    "asbuild:untouched": "asc assembly/index.ts --target debug",
+    "asbuild:optimized": "asc assembly/index.ts --target release",
+    "asbuild": "npm run asbuild:untouched && npm run asbuild:optimized",
+    "build": "fastly compute build",
+    "deploy": "fastly compute deploy"
+  },
+  "dependencies": {
+    "@assemblyscript/loader": "^0.19.1",
+    "@fastly/as-compute": "^0.3.0",
+    "as-wasi": "^0.4.5",
+    "assemblyscript-json": "^1.0.0",
+    "assemblyscript-regex": "^1.6.3"
+  },
+  "devDependencies": {
+    "@as-pect/cli": "^6.1.1",
+    "@as-pect/core": "^6.1.1",
+    "assemblyscript": "^0.18.32"
+  }
+}
