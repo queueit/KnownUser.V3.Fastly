@@ -1,6 +1,6 @@
 {
   "name": "@queue-it/fastly",
-  "version": "3.6.1",
+  "version": "1.0.0",
   "description": "Queue-it connector for Fastly",
   "main": "assembly/index.ts",
   "ascMain": "assembly/index.ts",
