@@ -1,31 +1,13 @@
 # KnownUser.V3.Fastly
 
-The Queue-it Security Framework ensures that end-users are not able to access your online application without first
-going through the queue for any and all *protected* areas and paths on your sites. The queue system is implemented by
-adding a server-side (request-level) integration that protects your online application by redirecting users to a waiting
-room according to web traffic settings in the Queue-it GO Platform. After the integration is complete, queue system
-behavior and operations are managed in Queue-it's Go Platform and/or via the Queue-it Admin API.
+Before getting started please read the [documentation](https://github.com/queueit/Documentation/tree/main/edge-connectors) to get acquainted with edge connectors.
 
-This Fastly Queue-it Connector SDK (aka, Queue-it's server-side KnownUser connector) uses a Compute@Edge service to
+This Fastly Queue-it Connector (aka, Queue-it's server-side KnownUser connector) uses a Compute@Edge service to
 integrate Queue-it's functionality into Fastly's network.
 
 A Wasm service is required to utilize this connector.
 
 > You can find the latest released version [here](https://github.com/queueit/KnownUser.V3.Fastly/releases/latest).
-
-## Introduction
-
-When a user makes a request to your Fastly service our connector validates the request and if it is needed, it will
-redirect the user to the waiting room. After waiting in the waiting room, the queue engine will redirect the user back
-to your end attaching a query string parameter ( `queueittoken` ) containing some information about the user to the URL.
-The most important fields of the `queueittoken` are:
-
-- q - The user's unique queue identifier
-- ts - A timestamp of how long this redirect is valid
-- h - A hash of the token
-
-After the user returns from the queue, the connector will let the user continue his request to your backend ( without
-redirecting to the queue since the request has a valid queueittoken as query string) .
 
 ## Installation
 
@@ -103,27 +85,3 @@ if (res != null) {
 - Build and deploy the package running `fastly compute build` and `fastly compute deploy` in the same directory.
 - Create desired waiting room(s), triggers, and actions in the Go Queue-It self-service platform.  
   Then, save/publish the configuration.
-
-## Providing the queue configuration
-
-The recommended way is to use the Go Queue-it self-service portal to setup the configuration. The configuration
-specifies a set of Triggers and Actions. A Trigger is an expression matching one, more or all URLs on your website. When
-a user enter your website and the URL matches a Trigger-expression the corresponding Action will be triggered. The
-Action specifies which waiting room the users should be send to. In this way you can specify which waiting room(s)
-should protect which page(s) on the fly without changing the server-side integration.
-
-## Protecting AJAX calls
-
-If you need to protect AJAX calls beside page loads you need to add the below JavaScript tags to your pages:
-
-```html
-
-<script type="text/javascript" src="//static.queue-it.net/script/queueclient.min.js"></script>
-<script
-        data-queueit-intercept-domain="{YOUR_CURRENT_DOMAIN}"
-        data-queueit-intercept="true"
-        data-queueit-c="{YOUR_CUSTOMER_ID}"
-        type="text/javascript"
-        src="//static.queue-it.net/script/queueconfigloader.min.js">
-</script>
-```
