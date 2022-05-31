@@ -1,6 +1,6 @@
 {
   "name": "@queue-it/fastly",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "description": "Queue-it connector for Fastly",
   "main": "assembly/index.ts",
   "ascMain": "assembly/index.ts",
@@ -26,15 +26,15 @@
     "deploy": "fastly compute deploy"
   },
   "dependencies": {
-    "@assemblyscript/loader": "^0.19.1",
-    "@fastly/as-compute": "^0.3.0",
-    "as-wasi": "^0.4.5",
-    "assemblyscript-json": "^1.0.0",
+    "@assemblyscript/loader": "^0.19.16",
+    "@fastly/as-compute": "^0.4.1",
+    "as-wasi": "^0.4.6",
+    "assemblyscript-json": "^1.1.0",
     "assemblyscript-regex": "^1.6.3"
   },
   "devDependencies": {
-    "@as-pect/cli": "^6.1.1",
-    "@as-pect/core": "^6.1.1",
-    "assemblyscript": "^0.18.32"
+    "@as-pect/cli": "^6.2.4",
+    "@as-pect/core": "^6.2.1",
+    "assemblyscript": "^0.19.16"
   }
 }
