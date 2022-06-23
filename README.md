@@ -29,7 +29,7 @@ There are two methods of installation:
     - secret: Your KnownUserV3 secret
     - queueItOrigin: The name of the queue-it host, in this case it's `queue-it`  
       You can find these values in the Go Queue-It self-service platform.
-- Download the latest package from the releases page and unarchive it.
+- Download the latest package file (release-package.tar.gz) from the releases page and unarchive it.
 - Edit the `fastly.toml` file and copy the ID of your service (you can see this by opening up the service in Fastly) and
   replace __{YourServiceId}__ with it.
 - Archive the directory in the same format (tar.gz).
