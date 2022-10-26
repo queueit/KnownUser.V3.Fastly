@@ -71,7 +71,7 @@ let res = onQueueITRequest(req, integrationDetails);
 if (res != null) {
     Fastly.respondWith(res!);
 } else {
-    const myOrigin = 'Ticketania';
+    const myOrigin = 'origin';
     const cacheOverride = new Fastly.CacheOverride();
     const res = Fastly.fetch(req, {
         backend: myOrigin,
