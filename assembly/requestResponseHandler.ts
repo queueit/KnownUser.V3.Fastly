@@ -131,6 +131,6 @@ export function onQueueITResponse(res: Response): void {
     if (contextHeaderKeys[i].length == 0) continue;
     let value = contextHeaders.get(contextHeaderKeys[i]);
     if (value != null && value!.length > 0)
-      res.headers.set(contextHeaderKeys[i], value!);
+      res.headers.append(contextHeaderKeys[i], value!);
   }
 }
