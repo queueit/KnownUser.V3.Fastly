@@ -61,12 +61,16 @@ import {onQueueITRequest, IntegrationDetails, onQueueITResponse} from "@queue-it
 const req = Fastly.getClientRequest();
 
 // This is optional and can be null if it's specified in your Dictionary
-const integrationDetails = new IntegrationDetails(
-        "QueueItOriginName",
-        "CustomerId",
-        "SecretKey",
-        "ApiKey");
+/* const integrationDetails = new IntegrationDetails(
+        {QueueItOriginName},
+        {CustomerId},
+        {SecretKey},
+        {ApiKey},
+        {workerHost});
 let res = onQueueITRequest(req, integrationDetails);
+*/
+
+let res = onQueueITRequest(req, null);
 
 if (res != null) {
     Fastly.respondWith(res!);
