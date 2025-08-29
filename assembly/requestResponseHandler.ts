@@ -69,6 +69,7 @@ export function onQueueITRequest(
         url: "",
       });
       // In case of ajax call send the user to the queue by sending a custom queue-it header and redirecting user to queue from javascript
+      response.headers.set("Access-Control-Expose-Headers", validationResult.getAjaxQueueRedirectHeaderKey());
       response.headers.set(
         validationResult.getAjaxQueueRedirectHeaderKey(),
         QueueITHelper.addKUPlatformVersion(
