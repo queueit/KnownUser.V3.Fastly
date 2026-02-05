@@ -9,6 +9,26 @@ describe('CustomerIntegrationDecodingHandler', () => {
    "Description":"tst",
    "Integrations":[
       {
+         "Name":"Integration - With InvolvedWaitingRoomIds",
+         "ActionType":"Cancel",
+         "EventId":"event2",
+         "InvolvedWaitingRoomIds":["event2"],
+         "Triggers":[
+            {
+               "TriggerParts":[
+                  {
+                     "ValidatorType":"UrlValidator",
+                     "Operator":"Contains",
+                     "ValueToCompare":"test2",
+                     "IsNegative":false,
+                     "IsIgnoreCase":true
+                  }
+               ],
+               "LogicalOperator":"And"
+            }
+         ]
+      },
+      {
          "Name":"mojitest",
          "ActionType":"Queue",
          "EventId":"event1",
@@ -1050,6 +1070,26 @@ describe('CustomerIntegrationDecodingHandler', () => {
          "QueueDomain":"queueitknownusertst.test.queue-it.net",
          "RedirectLogic":"AllowTParameter",
          "ForcedTargetUrl":""
+      },
+      {
+         "Name":"Integration - With InvolvedWaitingRoomIds null",
+         "ActionType":"Queue",
+         "EventId":"event1",
+         "InvolvedWaitingRoomIds":null,
+         "Triggers":[
+            {
+               "TriggerParts":[
+                  {
+                     "ValidatorType":"UrlValidator",
+                     "Operator":"Contains",
+                     "ValueToCompare":"test1",
+                     "IsNegative":false,
+                     "IsIgnoreCase":true
+                  }
+               ],
+               "LogicalOperator":"And"
+            }
+         ]
       }
    ],
    "CustomerId":"queueitknownusertst",
@@ -1066,21 +1106,29 @@ describe('CustomerIntegrationDecodingHandler', () => {
 
         expect(customerIntegrationInfo.Version).toBe(55);
         expect(customerIntegrationInfo.Description).toBe("tst", 'Description should be deserialized');
-        expect(customerIntegrationInfo.Integrations.length).toBe(23);
-        expect(customerIntegrationInfo.Integrations[0].Name).toBe("mojitest");
-        expect(customerIntegrationInfo.Integrations[1].Name).toBe("all pages");
-        let triggerModel = customerIntegrationInfo.Integrations[0].Triggers[0];
+        expect(customerIntegrationInfo.Integrations.length).toBe(25);
+        
+        // Test InvolvedWaitingRoomIds array handling first (verifies no trigger accumulation bug)
+        expect(customerIntegrationInfo.Integrations[0].Name).toBe('Integration - With InvolvedWaitingRoomIds');
+        expect(customerIntegrationInfo.Integrations[0].Triggers.length).toBe(1, 'Integration - With InvolvedWaitingRoomIds should have exactly 1 trigger');
+        
+        expect(customerIntegrationInfo.Integrations[1].Name).toBe("mojitest");
+        expect(customerIntegrationInfo.Integrations[2].Name).toBe("all pages");
+        let triggerModel = customerIntegrationInfo.Integrations[1].Triggers[0];
         expect(triggerModel.LogicalOperator).toBe("And");
         expect(triggerModel.TriggerParts[0].ValueToCompare).toBe("mojitest");
         expect(triggerModel.TriggerParts[0].IsNegative).toBe(false);
         expect(triggerModel.TriggerParts[0].IsIgnoreCase).toBe(true);
 
-        triggerModel = customerIntegrationInfo.Integrations[1].Triggers[0];
+        triggerModel = customerIntegrationInfo.Integrations[2].Triggers[0];
         expect(triggerModel.TriggerParts[0].ValueToCompare).toBe('test02082018');
 
-        triggerModel = customerIntegrationInfo.Integrations[2].Triggers[0];
+        triggerModel = customerIntegrationInfo.Integrations[3].Triggers[0];
         expect(triggerModel.TriggerParts[1].ValuesToCompare.length).toBe(2);
         expect(triggerModel.TriggerParts[1].ValuesToCompare[0]).toBe('ignore-this-queue-event1-nodomain');
         expect(triggerModel.TriggerParts[1].ValuesToCompare[1]).toBe('ignore-that-queue-event1-nodomain');
+
+        expect(customerIntegrationInfo.Integrations[24].Name).toBe('Integration - With InvolvedWaitingRoomIds null');
+        expect(customerIntegrationInfo.Integrations[24].Triggers.length).toBe(1, 'Integration - With InvolvedWaitingRoomIds null should have exactly 1 trigger');
     });
 })

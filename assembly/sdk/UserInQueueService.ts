@@ -3,7 +3,7 @@ import {ActionTypes, RequestValidationResult, QueueEventConfig, CancelEventConfi
 import {StateInfo, UserInQueueStateCookieRepository} from './UserInQueueStateCookieRepository'
 
 export class UserInQueueService {
-    static readonly SDK_VERSION: string = "v3-asmscrpt-3.6.1";
+    static readonly SDK_VERSION: string = "v3-asmscrpt-3.6.2";
 
     constructor(private userInQueueStateRepository: UserInQueueStateCookieRepository) {
     }

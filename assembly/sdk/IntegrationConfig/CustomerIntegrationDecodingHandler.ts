@@ -7,6 +7,11 @@ import {
 } from "./IntegrationConfigModel";
 import {JSONDecoder} from "assemblyscript-json";
 
+const ARRAY_NAME_INTEGRATIONS = "Integrations";
+const ARRAY_NAME_TRIGGERS = "Triggers";
+const ARRAY_NAME_TRIGGER_PARTS = "TriggerParts";
+const ARRAY_NAME_VALUES_TO_COMPARE = "ValuesToCompare";
+
 export class CustomerIntegrationDecodingHandler extends JSONHandler {
     private readonly _deserializedValue: CustomerIntegration;
     private isInIntegrations: bool = false;
@@ -19,6 +24,7 @@ export class CustomerIntegrationDecodingHandler extends JSONHandler {
     private currentTriggerPart: TriggerPart | null;
     private isInTriggerParts: bool = false;
     private isInTriggerPartValuesToCompare: bool = false;
+    private arrayStack: string[] = [];
 
     constructor() {
         super();
@@ -29,13 +35,18 @@ export class CustomerIntegrationDecodingHandler extends JSONHandler {
         // Handle array start
         // true means that nested object needs to be traversed, false otherwise
         // Note that returning false means JSONDecoder.startIndex need to be updated by handler
-        if (name == "Integrations") {
+
+        // Push array name to stack BEFORE checking if we recognize it
+        // This ensures every pushArray has a matching popArray
+        this.arrayStack.push(name);
+
+        if (name == ARRAY_NAME_INTEGRATIONS) {
             this.isInIntegrations = true;
-        } else if (name == "Triggers") {
+        } else if (name == ARRAY_NAME_TRIGGERS) {
             this.isInTriggers = true;
-        } else if (name == "TriggerParts") {
+        } else if (name == ARRAY_NAME_TRIGGER_PARTS) {
             this.isInTriggerParts = true;
-        } else if (name == "ValuesToCompare") {
+        } else if (name == ARRAY_NAME_VALUES_TO_COMPARE) {
             this.isInTriggerPartValuesToCompare = true;
         }
         return this.isInIntegrations
@@ -46,15 +57,24 @@ export class CustomerIntegrationDecodingHandler extends JSONHandler {
 
 
     popArray(): void {
-        if (this.isInTriggerPartValuesToCompare) {
+        // Pop array name from stack
+        if (this.arrayStack.length == 0) {
+            return; // Defensive: should never happen
+        }
+
+        const arrayName = this.arrayStack.pop();
+
+        // Only clear flags for recognized arrays
+        if (arrayName == ARRAY_NAME_VALUES_TO_COMPARE) {
             this.isInTriggerPartValuesToCompare = false;
-        } else if (this.isInTriggerParts) {
+        } else if (arrayName == ARRAY_NAME_TRIGGER_PARTS) {
             this.isInTriggerParts = false;
-        } else if (this.isInTriggers) {
+        } else if (arrayName == ARRAY_NAME_TRIGGERS) {
             this.isInTriggers = false;
-        } else if (this.isInIntegrations) {
+        } else if (arrayName == ARRAY_NAME_INTEGRATIONS) {
             this.isInIntegrations = false;
         }
+        // Note: Unrecognized arrays (like InvolvedWaitingRoomIds) are popped but don't affect flags
     }
 
     pushObject(name: string): bool {
@@ -76,7 +96,10 @@ export class CustomerIntegrationDecodingHandler extends JSONHandler {
             this.currentTriggerModel!.TriggerParts.push(this.currentTriggerPart!);
             this.isInTriggerPart = false;
         } else if (this.isInTriggerModel) {
-            this.currentIntegrationConfigModel!.Triggers.push(this.currentTriggerModel!);
+            // Defensive: only add trigger if we have a valid integration
+            if (this.currentIntegrationConfigModel != null) {
+                this.currentIntegrationConfigModel!.Triggers.push(this.currentTriggerModel!);
+            }
             this.isInTriggerModel = false;
         } else if (this.isInConfigModel) {
             this._deserializedValue.Integrations.push(this.currentIntegrationConfigModel!);
