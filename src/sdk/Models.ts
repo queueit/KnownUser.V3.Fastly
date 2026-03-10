@@ -20,10 +20,10 @@ export class QueueEventConfig {
         public layoutName: string,
         public culture: string,
         public queueDomain: string,
-        public extendCookieValidity: bool,
-        public cookieValidityMinute: i64,
+        public extendCookieValidity: boolean,
+        public cookieValidityMinute: number,
         public cookieDomain: string,
-        public version: i64,
+        public version: number,
         public actionName: string = 'unspecified') {
     }
 
@@ -44,7 +44,7 @@ export class CancelEventConfig {
     constructor(public eventId: string,
                 public queueDomain: string,
                 public cookieDomain: string,
-                public version: i64,
+                public version: number,
                 public actionName: string = 'unspecified') {
     }
 
@@ -68,9 +68,9 @@ export class RequestValidationResult {
     ) {
     }
 
-    public isAjaxResult: bool;
+    public isAjaxResult: boolean = false;
 
-    public doRedirect(): bool {
+    public doRedirect(): boolean {
         return this.redirectUrl.length > 0;
     }
 

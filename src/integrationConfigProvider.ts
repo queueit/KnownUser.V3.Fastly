@@ -1,10 +1,9 @@
-import { Fastly, Headers, Request } from "@fastly/as-compute";
 import { RequestLogger } from "./helper";
 
-export function getIntegrationConfig(
+export async function getIntegrationConfig(
   details: IntegrationDetails,
   endpointProvider: IntegrationEndpointProvider
-): string {
+): Promise<string> {
   const headers = new Headers();
   headers.set("api-key", details.apiKey);
   headers.set("host", endpointProvider.getHostname(details.customerId));
@@ -16,19 +15,16 @@ export function getIntegrationConfig(
       headers: headers,
     }
   );
-  let cacheOverride = new Fastly.CacheOverride();
-  let cacheConf = endpointProvider.getCacheConfig();
-  if (cacheConf.maxAge != -1) {
-    cacheOverride.setTTL(cacheConf.maxAge);
-  }
-  if (cacheConf.staleWhileRevalidate != -1) {
-    cacheOverride.setSWR(cacheConf.staleWhileRevalidate);
-  }
+  const cacheConf = endpointProvider.getCacheConfig();
+  const cacheInit: { ttl?: number; swr?: number } = {};
+  if (cacheConf.maxAge !== -1) cacheInit.ttl = cacheConf.maxAge;
+  if (cacheConf.staleWhileRevalidate !== -1) cacheInit.swr = cacheConf.staleWhileRevalidate;
+  const cacheOverride = new CacheOverride("override", cacheInit);
 
-  let beresp = Fastly.fetch(request, {
+  const beresp = await fetch(request, {
     backend: details.queueItOrigin,
     cacheOverride: cacheOverride,
-  }).wait();
+  });
 
   if (!(details.logger instanceof MockLogger)) {
     let cacheState = beresp.headers.get("x-cache");
@@ -41,7 +37,7 @@ export function getIntegrationConfig(
   if (beresp.status != 200) {
     return "";
   }
-  return beresp.text();
+  return await beresp.text();
 }
 
 const integrationCustomerId = "customerId",
@@ -52,19 +48,20 @@ const integrationCustomerId = "customerId",
   workerHost = "workerHost";
 
 export function resolveIntegrationDetails(): IntegrationDetails | null {
-  const dict = new Fastly.Dictionary(integrationDictionary);
+  const dict = new ConfigStore(integrationDictionary);
   if (
-    !dict.contains(integrationCustomerId) ||
-    !dict.contains(integrationApiKey) ||
-    !dict.contains(integrationSecret) ||
-    !dict.contains(integrationQueueItOrigin)
+    dict.get(integrationCustomerId) === null ||
+    dict.get(integrationApiKey) === null ||
+    dict.get(integrationSecret) === null ||
+    dict.get(integrationQueueItOrigin) === null
   ) {
     return null;
   }
 
   let workerHostValue = "";
-  if (dict.contains(workerHost)) {
-    workerHostValue = dict.get(workerHost)!;
+  const workerHostVal = dict.get(workerHost);
+  if (workerHostVal !== null) {
+    workerHostValue = workerHostVal;
   }
 
   return new IntegrationDetails(
@@ -77,8 +74,8 @@ export function resolveIntegrationDetails(): IntegrationDetails | null {
 }
 
 export class IntegrationEndpointCacheConfig {
-  maxAge: i16 = -1;
-  staleWhileRevalidate: i16 = -1;
+  maxAge: number = -1;
+  staleWhileRevalidate: number = -1;
 }
 
 export interface IntegrationEndpointProvider {

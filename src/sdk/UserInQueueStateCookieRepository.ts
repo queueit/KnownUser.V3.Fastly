@@ -1,6 +1,5 @@
 import {IHttpContextProvider} from './HttpContextProvider'
 import {Utils, CookieHelper} from './QueueITHelpers'
-import {Date as WasiDate} from "as-wasi";
 import {KeyValuePair} from "./Models";
 
 export class UserInQueueStateCookieRepository {
@@ -19,7 +18,7 @@ export class UserInQueueStateCookieRepository {
         return UserInQueueStateCookieRepository._QueueITDataKey + "_" + eventId;
     }
 
-    public store(eventId: string, queueId: string, fixedCookieValidityMinutes: i64,
+    public store(eventId: string, queueId: string, fixedCookieValidityMinutes: number,
                  cookieDomain: string, redirectType: string, secretKey: string): void {
         this.createCookie(
             eventId, queueId,
@@ -52,8 +51,8 @@ export class UserInQueueStateCookieRepository {
             UserInQueueStateCookieRepository._HashKey,
             this.generateHash(eventId.toLowerCase(), queueId, fixedCookieValidityMinutes, redirectType.toLowerCase(), issueTime, secretKey)
         ));
-        const tomorrow: Date = new Date(i64(WasiDate.now()) + 1000 * 60 * 60 * 24);
-        const expire: i32 = Math.floor((tomorrow.getTime() / 1000) as f64) as i32;
+        const tomorrow: Date = new Date(Date.now() + 1000 * 60 * 60 * 24);
+        const expire: number = Math.floor(tomorrow.getTime() / 1000);
         let cookieValue = CookieHelper.toValueFromKeyValueCollection(cookieValues);
 
         this.httpContextProvider.getHttpResponse().setCookie(cookieKey,
@@ -61,7 +60,7 @@ export class UserInQueueStateCookieRepository {
             cookieDomain, expire);
     }
 
-    public getState(eventId: string, cookieValidityMinutes: i64, secretKey: string, validateTime: bool): StateInfo {
+    public getState(eventId: string, cookieValidityMinutes: number, secretKey: string, validateTime: boolean): StateInfo {
         const cookieKey = UserInQueueStateCookieRepository.getCookieKey(eventId);
         const cookie = this.httpContextProvider.getHttpRequest().getCookieValue(cookieKey);
 
@@ -74,37 +73,37 @@ export class UserInQueueStateCookieRepository {
             return new StateInfo(true, false, "", 0, "");
         }
 
-        const fixedCookieValidity: i64 = cookieValues.has(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)
-            ? I64.parseInt(cookieValues.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey))
+        const fixedCookieValidity: number = cookieValues.has(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)
+            ? parseInt(cookieValues.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)!, 10)
             : 0;
 
         return new StateInfo(
             true,
             true,
-            cookieValues.get(UserInQueueStateCookieRepository._QueueIdKey),
+            cookieValues.get(UserInQueueStateCookieRepository._QueueIdKey)!,
             fixedCookieValidity,
-            cookieValues.get(UserInQueueStateCookieRepository._RedirectTypeKey));
+            cookieValues.get(UserInQueueStateCookieRepository._RedirectTypeKey)!);
     }
 
     private isCookieValid(
         secretKey: string,
         cookieValueMap: Map<string, string>,
         eventId: string,
-        cookieValidityMinutes: i64,
-        validateTime: bool): bool {
+        cookieValidityMinutes: number,
+        validateTime: boolean): boolean {
 
         const storedHash = cookieValueMap.has(UserInQueueStateCookieRepository._HashKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._HashKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._HashKey)! : "";
         const issueTimeString = cookieValueMap.has(UserInQueueStateCookieRepository._IssueTimeKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._IssueTimeKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._IssueTimeKey)! : "";
         const queueId = cookieValueMap.has(UserInQueueStateCookieRepository._QueueIdKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._QueueIdKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._QueueIdKey)! : "";
         const eventIdFromCookie = cookieValueMap.has(UserInQueueStateCookieRepository._EventIdKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._EventIdKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._EventIdKey)! : "";
         const redirectType = cookieValueMap.has(UserInQueueStateCookieRepository._RedirectTypeKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._RedirectTypeKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._RedirectTypeKey)! : "";
         let fixedCookieValidityMinutes = cookieValueMap.has(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey) ?
-            cookieValueMap.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey) : "";
+            cookieValueMap.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)! : "";
 
         const expectedHash = this.generateHash(
             eventIdFromCookie,
@@ -124,8 +123,8 @@ export class UserInQueueStateCookieRepository {
             return false;
 
         if (validateTime) {
-            let validity: i64 = fixedCookieValidityMinutes.length > 0 ? I64.parseInt(fixedCookieValidityMinutes) : cookieValidityMinutes;
-            let expirationTime: i64 = I64.parseInt(issueTimeString) + validity * 60;
+            let validity: number = fixedCookieValidityMinutes.length > 0 ? parseInt(fixedCookieValidityMinutes, 10) : cookieValidityMinutes;
+            let expirationTime: number = parseInt(issueTimeString, 10) + validity * 60;
 
             if (expirationTime < Utils.getCurrentTime())
                 return false;
@@ -138,7 +137,7 @@ export class UserInQueueStateCookieRepository {
         this.httpContextProvider.getHttpResponse().setCookie(cookieKey, "", cookieDomain, 0);
     }
 
-    public reissueQueueCookie(eventId: string, cookieValidityMinutes: i64, cookieDomain: string, secretKey: string): void {
+    public reissueQueueCookie(eventId: string, cookieValidityMinutes: number, cookieDomain: string, secretKey: string): void {
         const cookieKey = UserInQueueStateCookieRepository.getCookieKey(eventId);
         const cookie = this.httpContextProvider.getHttpRequest().getCookieValue(cookieKey);
 
@@ -152,14 +151,14 @@ export class UserInQueueStateCookieRepository {
 
         let fixedCookieValidityMinutes = "";
         if (cookieValues.has(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)) {
-            fixedCookieValidityMinutes = cookieValues.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey).toString();
+            fixedCookieValidityMinutes = cookieValues.get(UserInQueueStateCookieRepository._FixedCookieValidityMinutesKey)!.toString();
         }
 
         this.createCookie(
             eventId,
-            cookieValues.get(UserInQueueStateCookieRepository._QueueIdKey),
+            cookieValues.get(UserInQueueStateCookieRepository._QueueIdKey)!,
             fixedCookieValidityMinutes,
-            cookieValues.get(UserInQueueStateCookieRepository._RedirectTypeKey),
+            cookieValues.get(UserInQueueStateCookieRepository._RedirectTypeKey)!,
             cookieDomain, secretKey);
     }
 
@@ -176,14 +175,14 @@ export class UserInQueueStateCookieRepository {
 }
 
 export class StateInfo {
-    constructor(public isFound: bool,
-                public isValid: bool,
+    constructor(public isFound: boolean,
+                public isValid: boolean,
                 public queueId: string,
-                public fixedCookieValidityMinutes: i64,
+                public fixedCookieValidityMinutes: number,
                 public redirectType: string) {
     }
 
-    isStateExtendable(): bool {
+    isStateExtendable(): boolean {
         return this.isValid && !this.fixedCookieValidityMinutes;
     }
 }

@@ -1,8 +1,6 @@
 import * as IntegrationModels from './IntegrationConfigModel'
 import {KnownUserException} from '../Models'
 import {IHttpRequest} from '../HttpContextProvider'
-//@ts-ignore
-import {URL} from '@fastly/as-url';
 
 export interface IIntegrationEvaluator {
     getMatchedIntegrationConfig(
@@ -35,7 +33,7 @@ export class IntegrationEvaluator implements IIntegrationEvaluator {
         return null;
     }
 
-    private evaluateTrigger(trigger: IntegrationModels.TriggerModel, currentPageUrl: string, request: IHttpRequest): bool {
+    private evaluateTrigger(trigger: IntegrationModels.TriggerModel, currentPageUrl: string, request: IHttpRequest): boolean {
         if (trigger.LogicalOperator == IntegrationModels.LogicalOperatorType.Or) {
             for (let i = 0; i < trigger.TriggerParts.length; i++) {
                 let part = trigger.TriggerParts[i];
@@ -54,7 +52,7 @@ export class IntegrationEvaluator implements IIntegrationEvaluator {
         }
     }
 
-    private evaluateTriggerPart(triggerPart: IntegrationModels.TriggerPart, currentPageUrl: string, request: IHttpRequest): bool {
+    private evaluateTriggerPart(triggerPart: IntegrationModels.TriggerPart, currentPageUrl: string, request: IHttpRequest): boolean {
         if (triggerPart.ValidatorType == IntegrationModels.ValidatorType.UrlValidator) {
             return UrlValidatorHelper.evaluate(triggerPart, currentPageUrl);
         } else if (triggerPart.ValidatorType == IntegrationModels.ValidatorType.CookieValidator) {
@@ -72,7 +70,7 @@ export class IntegrationEvaluator implements IIntegrationEvaluator {
 }
 
 export class UrlValidatorHelper {
-    public static evaluate(triggerPart: IntegrationModels.TriggerPart, url: string): bool {
+    public static evaluate(triggerPart: IntegrationModels.TriggerPart, url: string): boolean {
         let urlpart = this.getUrlPart(triggerPart, url);
         return ComparisonOperatorHelper.evaluate(
             triggerPart.Operator,
@@ -107,7 +105,7 @@ export class UrlValidatorHelper {
 }
 
 export class CookieValidatorHelper {
-    public static evaluate(triggerPart: IntegrationModels.TriggerPart, request: IHttpRequest): bool {
+    public static evaluate(triggerPart: IntegrationModels.TriggerPart, request: IHttpRequest): boolean {
         return ComparisonOperatorHelper.evaluate(triggerPart.Operator,
             triggerPart.IsNegative,
             triggerPart.IsIgnoreCase,
@@ -122,7 +120,7 @@ export class CookieValidatorHelper {
 }
 
 export class UserAgentValidatorHelper {
-    public static evaluate(triggerPart: IntegrationModels.TriggerPart, userAgent: string): bool {
+    public static evaluate(triggerPart: IntegrationModels.TriggerPart, userAgent: string): boolean {
 
         return ComparisonOperatorHelper.evaluate(triggerPart.Operator,
             triggerPart.IsNegative,
@@ -134,7 +132,7 @@ export class UserAgentValidatorHelper {
 }
 
 export class RequestBodyValidatorHelper {
-    public static evaluate(triggerPart: IntegrationModels.TriggerPart, bodyString: string): bool {
+    public static evaluate(triggerPart: IntegrationModels.TriggerPart, bodyString: string): boolean {
 
         return ComparisonOperatorHelper.evaluate(triggerPart.Operator,
             triggerPart.IsNegative,
@@ -146,7 +144,7 @@ export class RequestBodyValidatorHelper {
 }
 
 export class HttpHeaderValidatorHelper {
-    public static evaluate(triggerPart: IntegrationModels.TriggerPart, headerValue: string): bool {
+    public static evaluate(triggerPart: IntegrationModels.TriggerPart, headerValue: string): boolean {
         return ComparisonOperatorHelper.evaluate(triggerPart.Operator,
             triggerPart.IsNegative,
             triggerPart.IsIgnoreCase,
@@ -158,11 +156,11 @@ export class HttpHeaderValidatorHelper {
 
 export class ComparisonOperatorHelper {
     public static evaluate(opt: string,
-                           isNegative: bool,
-                           isIgnoreCase: bool,
+                           isNegative: boolean,
+                           isIgnoreCase: boolean,
                            value: string,
                            valueToCompare: string,
-                           valuesToCompare: Array<string> | null): bool {
+                           valuesToCompare: Array<string> | null): boolean {
         if (valuesToCompare == null) {
             valuesToCompare = new Array<string>();
         }
@@ -179,7 +177,7 @@ export class ComparisonOperatorHelper {
         }
     }
 
-    private static contains(value: string, valueToCompare: string, isNegative: bool, ignoreCase: bool): bool {
+    private static contains(value: string, valueToCompare: string, isNegative: boolean, ignoreCase: boolean): boolean {
         if (valueToCompare == "*" && value != "")
             return true;
 
@@ -196,7 +194,7 @@ export class ComparisonOperatorHelper {
             return evaluation;
     }
 
-    private static equalS(value: string, valueToCompare: string, isNegative: bool, ignoreCase: bool): bool {
+    private static equalS(value: string, valueToCompare: string, isNegative: boolean, ignoreCase: boolean): boolean {
         let evaluation = false;
 
         if (ignoreCase)
@@ -210,7 +208,7 @@ export class ComparisonOperatorHelper {
             return evaluation;
     }
 
-    private static equalsAny(value: string, valuesToCompare: Array<string>, isNegative: bool, isIgnoreCase: bool): bool {
+    private static equalsAny(value: string, valuesToCompare: Array<string>, isNegative: boolean, isIgnoreCase: boolean): boolean {
         for (let i = 0; i < valuesToCompare.length; i++) {
             let valueToCompare = valuesToCompare[i];
             if (ComparisonOperatorHelper.equalS(value, valueToCompare, false, isIgnoreCase))
@@ -220,7 +218,7 @@ export class ComparisonOperatorHelper {
         return isNegative;
     }
 
-    private static containsAny(value: string, valuesToCompare: Array<string>, isNegative: bool, isIgnoreCase: bool): bool {
+    private static containsAny(value: string, valuesToCompare: Array<string>, isNegative: boolean, isIgnoreCase: boolean): boolean {
         for (let i = 0; i < valuesToCompare.length; i++) {
             let valueToCompare = valuesToCompare[i];
             if (ComparisonOperatorHelper.contains(value, valueToCompare, false, isIgnoreCase))

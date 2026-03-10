@@ -81,7 +81,7 @@ export class UserInQueueService {
     private getQueryString(
         customerId: string,
         eventId: string,
-        configVersion: i64,
+        configVersion: number,
         culture: string,
         layoutName: string,
         actionName: string)
@@ -143,7 +143,7 @@ export class UserInQueueService {
         const queueParams = QueueParameterHelper.extractQueueParams(queueitToken);
 
         let requestValidationResult: RequestValidationResult | null;
-        let isTokenValid: bool = false;
+        let isTokenValid: boolean = false;
 
         if (queueParams != null) {
             const tokenValidationResult = this.validateToken(config, queueParams, secretKey);
@@ -201,7 +201,7 @@ export class UserInQueueService {
 
     public extendQueueCookie(
         eventId: string,
-        cookieValidityMinutes: i64,
+        cookieValidityMinutes: number,
         cookieDomain: string,
         secretKey: string): void {
         this.userInQueueStateRepository.reissueQueueCookie(eventId, cookieValidityMinutes, cookieDomain, secretKey)
@@ -237,7 +237,7 @@ export class UserInQueueService {
 
 class TokenValidationResult {
     constructor(
-        public isValid: bool,
+        public isValid: boolean,
         public errorCode: string) {
 
     }

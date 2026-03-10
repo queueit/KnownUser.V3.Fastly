@@ -1,5 +1,4 @@
 import {IHttpContextProvider, IHttpRequest, IHttpResponse} from "./sdk/HttpContextProvider";
-import {Request, Fastly, Headers} from "@fastly/as-compute";
 import {decodeURIComponent, encodeURIComponent} from "./sdk/helpers/Uri";
 
 export function getHttpHandler(req: Request): FastlyHttpContextProvider {
@@ -7,9 +6,8 @@ export function getHttpHandler(req: Request): FastlyHttpContextProvider {
 }
 
 export class FastlyHttpContextProvider implements IHttpContextProvider {
-    isError: bool = false;
+    isError: boolean = false;
     private readonly req: FastlyHttpRequest;
-    // @ts-ignore
     private readonly res: FastlyHttpResponse;
 
     constructor(fReq: Request) {
@@ -28,7 +26,7 @@ export class FastlyHttpContextProvider implements IHttpContextProvider {
 
 export class FastlyHttpRequest implements IHttpRequest {
     private parsedCookieDic: Map<string, string>
-    private bodyFetched: bool = false;
+    private bodyFetched: boolean = false;
     private body: string = '';
 
     constructor(private baseReq: Request) {
@@ -67,10 +65,10 @@ export class FastlyHttpRequest implements IHttpRequest {
     }
 
     getCookieValue(cookieKey: string): string {
-        if (this.parsedCookieDic.keys().length == 0) {
+        if (this.parsedCookieDic.size == 0) {
             this.parseCookies(this.getHeader('cookie'))
         }
-        return this.parsedCookieDic.has(cookieKey) ? decodeURIComponent(this.parsedCookieDic.get(cookieKey)) : '';
+        return this.parsedCookieDic.has(cookieKey) ? decodeURIComponent(this.parsedCookieDic.get(cookieKey)!) : '';
     }
 
     getHeader(name: string): string {
@@ -95,7 +93,7 @@ export class FastlyHttpRequest implements IHttpRequest {
     }
 
     getUserHostAddress(): string {
-        return Fastly.getClientIpAddressString();
+        return this.baseReq.headers.get('Fastly-Client-IP') ?? '';
     }
 }
 
@@ -106,7 +104,7 @@ export class FastlyHttpResponse implements IHttpResponse {
         this.headers = new Headers();
     }
 
-    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: i64): void {
+    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: number): void {
         const expirationDate = new Date(expiration * 1000);
         let setCookieString = cookieName + "=" + encodeURIComponent(cookieValue) + "; expires=" + expirationDate.toUTCString() + ";";
         if (domain != "") {

@@ -1,4 +1,3 @@
-import {JSONDecoder} from "assemblyscript-json";
 import {CustomerIntegrationDecodingHandler} from "../sdk/IntegrationConfig/CustomerIntegrationDecodingHandler";
 import * as IntegrationModels from "../sdk/IntegrationConfig/IntegrationConfigModel";
 
@@ -1098,19 +1097,15 @@ describe('CustomerIntegrationDecodingHandler', () => {
    "PublishDate":"2021-05-25T08:43:43.3277603Z",
    "ConfigDataVersion":"1.0.0.3"
 }`;
-        const handler = new CustomerIntegrationDecodingHandler();
-        const customerIntegrationDecodingHandler = new JSONDecoder<CustomerIntegrationDecodingHandler>(handler);
-
-        customerIntegrationDecodingHandler.deserialize(Uint8Array.wrap(String.UTF8.encode(integrationConfigString)));
-        const customerIntegrationInfo: IntegrationModels.CustomerIntegration = handler.value();
+        const customerIntegrationInfo = CustomerIntegrationDecodingHandler.deserialize(integrationConfigString);
 
         expect(customerIntegrationInfo.Version).toBe(55);
-        expect(customerIntegrationInfo.Description).toBe("tst", 'Description should be deserialized');
+        expect(customerIntegrationInfo.Description).toBe("tst");
         expect(customerIntegrationInfo.Integrations.length).toBe(25);
         
         // Test InvolvedWaitingRoomIds array handling first (verifies no trigger accumulation bug)
         expect(customerIntegrationInfo.Integrations[0].Name).toBe('Integration - With InvolvedWaitingRoomIds');
-        expect(customerIntegrationInfo.Integrations[0].Triggers.length).toBe(1, 'Integration - With InvolvedWaitingRoomIds should have exactly 1 trigger');
+        expect(customerIntegrationInfo.Integrations[0].Triggers.length).toBe(1);
         
         expect(customerIntegrationInfo.Integrations[1].Name).toBe("mojitest");
         expect(customerIntegrationInfo.Integrations[2].Name).toBe("all pages");
@@ -1129,6 +1124,6 @@ describe('CustomerIntegrationDecodingHandler', () => {
         expect(triggerModel.TriggerParts[1].ValuesToCompare[1]).toBe('ignore-that-queue-event1-nodomain');
 
         expect(customerIntegrationInfo.Integrations[24].Name).toBe('Integration - With InvolvedWaitingRoomIds null');
-        expect(customerIntegrationInfo.Integrations[24].Triggers.length).toBe(1, 'Integration - With InvolvedWaitingRoomIds null should have exactly 1 trigger');
+        expect(customerIntegrationInfo.Integrations[24].Triggers.length).toBe(1);
     });
 })

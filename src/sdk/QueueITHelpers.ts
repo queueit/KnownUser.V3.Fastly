@@ -1,19 +1,15 @@
-//@ts-ignore
-import {RegExp} from "assemblyscript-regex";
 import {KeyValuePair, RequestValidationResult} from "./Models";
 import {IDateTimeProvider} from "./HttpContextProvider";
-import {Date as WasiDate} from "as-wasi";
 import {encodeURIComponent, decodeURIComponent} from "./helpers/Uri";
 import {KnownUser} from "./KnownUser";
-import {Response} from "@fastly/as-compute";
 import {UserInQueueService} from "./UserInQueueService";
 
 export class QueueUrlParams {
-    public timeStamp: i64 = 0;
+    public timeStamp: number = 0;
     public eventId: string = "";
     public hashCode: string = "";
-    public extendableCookie: bool = false;
-    public cookieValidityMinutes: i64 = 0;
+    public extendableCookie: boolean = false;
+    public cookieValidityMinutes: number = 0;
     public queueITToken: string = "";
     public queueITTokenWithoutHash: string = "";
     public queueId: string = "";
@@ -42,7 +38,7 @@ export class Utils {
 
     static generateSHA256Hash: (a: string, b: string) => string = (secretKey: string, stringToHash: string): string => "";
 
-    static endsWith(str: string, search: string): bool {
+    static endsWith(str: string, search: string): boolean {
         if (str == search)
             return true;
         if (str.length == 0 || search.length == 0)
@@ -50,11 +46,11 @@ export class Utils {
         return str.substring(str.length - search.length, str.length) == search;
     }
 
-    static getCurrentTime(): i64 {
-        return Math.floor((WasiDate.now() / 1000) as f64) as i64;
+    static getCurrentTime(): number {
+        return Math.floor(Date.now() / 1000);
     }
 
-    private static _hex2bin: u8[] = [
+    private static _hex2bin: number[] = [
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -78,8 +74,8 @@ export class Utils {
         let rv = '';
         let i = 0;
 
-        let c1: i32;
-        let c2: i32;
+        let c1: number;
+        let c2: number;
 
         while (len > 1) {
             let h1 = str.charAt(i++);
@@ -101,29 +97,29 @@ export class Utils {
     }
 
     static getParameterByName(url: string, name: string): string {
-        const namePart = new RegExp(`[\[\]]`, 'g')
+        const namePart = /[\[\]]/g;
         let match = namePart.exec(name);
-        while (match != null) {
-            let rxmatch = match.matches[0];
+        while (match !== null) {
+            let rxmatch = match[0];
             name = name.replaceAll(rxmatch, '\\$&')
             match = namePart.exec(name);
         }
         const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
         const results = regex.exec(url);
-        if (results == null) return '';
-        if (results.matches.length < 3) {
+        if (results === null) return '';
+        if (results.length < 3) {
             return '';
         }
 
-        return decodeURIComponent(results.matches[2].replaceAll('+', ' '));
+        return decodeURIComponent(results[2].replaceAll('+', ' '));
     }
 
     static removeQueueItToken(url: string): string {
-        const pattern = new RegExp("([\?&])(" + KnownUser.QueueITTokenKey + "=[^&]*)", 'gi');
+        const pattern = new RegExp("([?&])(" + KnownUser.QueueITTokenKey + "=[^&]*)", 'gi');
         const match = pattern.exec(url);
-        if (match == null) return url;
+        if (match === null) return url;
 
-        url = url.replaceAll(match.matches[0], '')
+        url = url.replaceAll(match[0], '')
         return url;
     }
 }
@@ -159,9 +155,9 @@ export class QueueParameterHelper {
             if (keyValueArr[0] == QueueParameterHelper.HashKey) {
                 result.hashCode = keyValueArr[1];
             } else if (keyValueArr[0] == QueueParameterHelper.TimeStampKey) {
-                result.timeStamp = I64.parseInt(keyValueArr[1]);
+                result.timeStamp = parseInt(keyValueArr[1], 10) || 0;
             } else if (keyValueArr[0] == QueueParameterHelper.CookieValidityMinutesKey) {
-                result.cookieValidityMinutes = I64.parseInt(keyValueArr[1]);
+                result.cookieValidityMinutes = parseInt(keyValueArr[1], 10) || 0;
             } else if (keyValueArr[0] == QueueParameterHelper.EventIdKey) {
                 result.eventId = keyValueArr[1];
             } else if (keyValueArr[0] == QueueParameterHelper.ExtendableCookieKey) {
@@ -211,9 +207,9 @@ export class CookieHelper {
 }
 
 export class ConnectorDiagnostics {
-    public isEnabled: bool = false;
-    public hasError: bool = false;
-    public validationResult: RequestValidationResult | null
+    public isEnabled: boolean = false;
+    public hasError: boolean = false;
+    public validationResult: RequestValidationResult | null = null
 
     private setStateWithTokenError(customerId: string, errorCode: string): void {
         this.hasError = true;
@@ -258,6 +254,6 @@ export class ConnectorDiagnostics {
 
 export class DateTimeProvider implements IDateTimeProvider {
     getCurrentTime(): Date {
-        return new Date(i64(WasiDate.now()));
+        return new Date(Date.now());
     }
 }

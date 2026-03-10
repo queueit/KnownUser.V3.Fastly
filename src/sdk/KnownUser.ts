@@ -30,7 +30,7 @@ export class KnownUser {
     }
 
     private static isQueueAjaxCall(
-        httpContextProvider: IHttpContextProvider): bool {
+        httpContextProvider: IHttpContextProvider): boolean {
         const ajaxHeader = httpContextProvider.getHttpRequest().getHeader(this.QueueITAjaxHeaderKey);
         return ajaxHeader != '';
     }
@@ -61,9 +61,7 @@ export class KnownUser {
         debugEntries: Map<string, string>,
         httpContextProvider: IHttpContextProvider): void {
         let cookieValue = "";
-        let entryKeys = debugEntries.keys();
-        for (let i = 0; i < entryKeys.length; i++) {
-            let key: string = entryKeys[i];
+        for (const key of debugEntries.keys()) {
             cookieValue += key + "=" + debugEntries.get(key) + "|";
         }
 
@@ -90,7 +88,7 @@ export class KnownUser {
         httpContextProvider: IHttpContextProvider,
         dateTimeProvider: IDateTimeProvider,
         debugEntries: Map<string, string>,
-        isDebug: bool): ValidationResult {
+        isDebug: boolean): ValidationResult {
 
         if (isDebug) {
             debugEntries.set("SdkVersion", UserInQueueService.SDK_VERSION);
@@ -133,7 +131,7 @@ export class KnownUser {
         httpContextProvider: IHttpContextProvider,
         dateTimeProvider: IDateTimeProvider,
         debugEntries: Map<string, string>,
-        isDebug: bool): ValidationResult {
+        isDebug: boolean): ValidationResult {
 
         targetUrl = this.generateTargetUrl(targetUrl, httpContextProvider);
 
@@ -177,7 +175,7 @@ export class KnownUser {
         httpContextProvider: IHttpContextProvider,
         dateTimeProvider: IDateTimeProvider,
         debugEntries: Map<string, string>,
-        isDebug: bool): ValidationResult {
+        isDebug: boolean): ValidationResult {
         let targetUrl: string;
 
         if (matchedConfig.RedirectLogic == "ForcedTargetUrl") {
@@ -211,7 +209,7 @@ export class KnownUser {
         httpContextProvider: IHttpContextProvider,
         dateTimeProvider: IDateTimeProvider,
         debugEntries: Map<string, string>,
-        isDebug: bool): ValidationResult {
+        isDebug: boolean): ValidationResult {
         const cancelEventConfig = new CancelEventConfig(
             matchedConfig.EventId,
             matchedConfig.QueueDomain,
@@ -235,7 +233,7 @@ export class KnownUser {
 
     public static extendQueueCookie(
         eventId: string,
-        cookieValidityMinute: i64,
+        cookieValidityMinute: number,
         cookieDomain: string,
         secretKey: string,
         httpContextProvider: IHttpContextProvider): KnownUserException | null {

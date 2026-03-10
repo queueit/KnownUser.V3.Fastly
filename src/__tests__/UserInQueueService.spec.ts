@@ -1,6 +1,3 @@
-//@ts-ignore
-import {RegExp} from 'assemblyscript-regex'
-
 import {Utils} from "../sdk/QueueITHelpers";
 import {UserInQueueService} from "../sdk/UserInQueueService";
 import {StateInfo} from "../sdk/UserInQueueStateCookieRepository";
@@ -13,9 +10,9 @@ const SDK_VERSION = UserInQueueService.SDK_VERSION;
 
 function generateHash(eventId: string,
                       queueId: string,
-                      timestamp: i64,
+                      timestamp: number,
                       extendableCookie: string,
-                      cookieValidityMinutes: i64,
+                      cookieValidityMinutes: number,
                       redirectType: string,
                       secretKey: string): string {
     let token = 'e_' + eventId + '~ts_' + timestamp.toString() + '~ce_' + extendableCookie + '~q_' + queueId;
@@ -65,7 +62,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
         expect(result.first!.doRedirect()).toBeFalsy();
         expect(result.first!.queueId).toBe('queueId');
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
         expect(userInQueueStateCookieRepositoryMock.getStateCall.get("eventId")).toBe("e1");
         expect(userInQueueStateCookieRepositoryMock.getStateCall.get("cookieValidityMinutes")).toBe("10");
         expect(userInQueueStateCookieRepositoryMock.getStateCall.get("secretKey")).toBe("key");
@@ -112,7 +109,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
         expect(result.first!.doRedirect()).toBeFalsy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe("queueId");
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
     });
 
     it('NoCookie_TampredToken_RedirectToErrorPageWithHashError_DoNotStoreCookie', () => {
@@ -141,18 +138,18 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest(url, token, eventConfig, "testCustomer", key);
         const tsPartRx = new RegExp('&ts=[^&]*', 'g')
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
         expect(result.first!.doRedirect()).toBeTruthy();
         expect(result.first!.eventId).toBe('e1');
 
         const tsMatch = tsPartRx.exec(result.first!.redirectUrl);
         expect(tsMatch).not.toBeNull()
 
-        const tsPart = tsMatch!.matches[0];
-        const timestamp = I64.parseInt(tsPart.replace("&ts=", ""));
+        const tsPart = tsMatch![0];
+        const timestamp = parseInt(tsPart.replace("&ts=", ""), 10);
         const urlWithoutTimeStamp = result.first!.redirectUrl.replace(tsPart, "");
-        expect(Utils.getCurrentTime() - timestamp < 100 as bool).toBe(true);
-        expect(urlWithoutTimeStamp).toBe(expectedErrorUrl, 'redirect url should be an error url');
+        expect((Utils.getCurrentTime() - timestamp) < 100).toBe(true);
+        expect(urlWithoutTimeStamp).toBe(expectedErrorUrl);
     });
 
     it('NoCookie_ValidToken_ExtendableCookie_DoNotRedirect_StoreExtendableCookie', () => {
@@ -173,7 +170,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest(url, token, eventConfig, "testCustomer", key);
 
-        expect(result.first!.doRedirect()).toBeFalsy('should redirect');
+        expect(result.first!.doRedirect()).toBeFalsy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe('queueId');
         expect(result.first!.redirectType).toBe('queue');
@@ -184,7 +181,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('cookieDomain')).toBe('testDomain');
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('redirectType')).toBe('queue');
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('secretKey')).toBe(key);
-        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.size).toBe(0);
     });
 
     it('NoCookie_ValidToken_CookieValidityMinuteFromToken_DoNotRedirect_StoreNonExtendableCookie', () => {
@@ -203,7 +200,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
         const token = generateHash('e1', 'queueId', Utils.getCurrentTime() + 3 * 60, 'false', 3, 'DirectLink', key);
         const result = userInQueueService.validateQueueRequest(url, token, eventConfig, "testCustomer", key);
 
-        expect(result.first!.doRedirect()).toBeFalsy('should not redirect');
+        expect(result.first!.doRedirect()).toBeFalsy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe('queueId');
         expect(result.first!.redirectType).toBe('DirectLink');
@@ -214,7 +211,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('cookieDomain')).toBe('testDomain');
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('redirectType')).toBe('DirectLink');
         expect(userInQueueStateCookieRepositoryMock.storeCall.get('secretKey')).toBe(key);
-        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.size).toBe(0);
     });
 
     it('NoCookie_NoValidToken_WithoutToken_RedirectToQueue', () => {
@@ -244,11 +241,11 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest(url, token, eventConfig, "testCustomer", key);
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0, 'store should not be called');
-        expect(result.first!.doRedirect()).toBeTruthy('should redirect');
-        expect(result.first!.eventId).toBe('e1', 'with WR ID');
-        expect(result.first!.queueId).toBe('', 'queue id should not be used');
-        expect(result.first!.redirectUrl).toBe(expectedRedirectUrl, 'should redirect to queue');
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
+        expect(result.first!.doRedirect()).toBeTruthy();
+        expect(result.first!.eventId).toBe('e1');
+        expect(result.first!.queueId).toBe('');
+        expect(result.first!.redirectUrl).toBe(expectedRedirectUrl);
     });
 
     it('InValidCookie_WithoutToken_RedirectToQueue_CancelCookie', () => {
@@ -278,7 +275,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest(url, token, eventConfig, "testCustomer", key);
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
         expect(result.first!.doRedirect()).toBeTruthy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe('');
@@ -310,7 +307,7 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest('', token, eventConfig, "testCustomer", key);
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
         expect(result.first!.doRedirect()).toBeTruthy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe('');
@@ -334,13 +331,13 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateQueueRequest(url, "ts_sasa~cv_adsasa~ce_falwwwse~q_944c1f44-60dd-4e37-aabc-f3e4bb1c8895", eventConfig, "testCustomer", key);
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0);
-        expect(result.first!.doRedirect()).toBeTruthy('should redirect');
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
+        expect(result.first!.doRedirect()).toBeTruthy();
         expect(result.first!.eventId).toBe('e1');
         expect(result.first!.queueId).toBe('');
         expect(result.first!.redirectUrl.indexOf("https://testDomain.com/error/hash/?c=testCustomer&e=e1")).toBe(0);
 
-        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.keys().length).toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.size).toBe(0);
     });
 
     it('InvalidCookie_InValidToken_CancelCookie', () => {
@@ -362,13 +359,13 @@ describe("UserInQueueService.validateQueueRequest", () => {
         const resultPair = userInQueueService.validateQueueRequest(url, "ts_sasa~cv_adsasa~ce_falwwwse~q_944c1f44-60dd-4e37-aabc-f3e4bb1c8895", eventConfig, "testCustomer", key);
         const result = resultPair.first;
 
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0, 'store should not be called');
-        expect(result!.doRedirect()).toBeTruthy('should redirect');
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
+        expect(result!.doRedirect()).toBeTruthy();
         expect(result!.eventId).toBe('e1');
         expect(result!.queueId).toBe('');
         expect(result!.redirectUrl.indexOf("https://testDomain.com/error/hash/?c=testCustomer&e=e1")).toBe(0);
 
-        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.keys().length > 0).toBeTruthy('cancelQueueCookie should be called');
+        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.size > 0).toBeTruthy();
     });
 
     it('validateCancelRequest', () => {
@@ -392,13 +389,13 @@ describe("UserInQueueService.validateQueueRequest", () => {
 
         const result = userInQueueService.validateCancelRequest(url, eventConfig, "testCustomer", key);
 
-        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.keys().length).not.toBe(0, 'cancelQueueCookie should be called');
-        expect(userInQueueStateCookieRepositoryMock.storeCall.keys().length).toBe(0, 'store shouldn`t be called');
-        expect(result.first!.redirectUrl).toBe(expectedUrl, 'Url should be cancel url');
-        expect(result.first!.doRedirect()).toBeTruthy('should redirect');
-        expect(result.first!.eventId).toBe('e1', 'WR ID should match');
-        expect(result.first!.queueId).toBe('queueid', 'QueueId should match');
-        expect(result.first!.actionName).toBe('Cancel', 'Action name should be Cancel');
+        expect(userInQueueStateCookieRepositoryMock.cancelQueueCookieCall.size).not.toBe(0);
+        expect(userInQueueStateCookieRepositoryMock.storeCall.size).toBe(0);
+        expect(result.first!.redirectUrl).toBe(expectedUrl);
+        expect(result.first!.doRedirect()).toBeTruthy();
+        expect(result.first!.eventId).toBe('e1');
+        expect(result.first!.queueId).toBe('queueid');
+        expect(result.first!.actionName).toBe('Cancel');
     });
 
 });

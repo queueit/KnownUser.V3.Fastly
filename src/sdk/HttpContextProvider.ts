@@ -1,4 +1,3 @@
-import { Headers } from "@fastly/as-compute";
 
 export interface IHttpRequest {
     getUserAgent(): string;
@@ -10,7 +9,7 @@ export interface IHttpRequest {
 }
 
 export interface IHttpResponse {
-    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: i64): void;
+    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: number): void;
     getHeaders(): Headers;
 }
 

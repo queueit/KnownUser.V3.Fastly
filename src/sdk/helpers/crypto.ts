@@ -1,16 +1,16 @@
 // Hash implements SHA256 hash algorithm.
 export class Hash {
-    blockSize: i32;
-    digestLength: i32;
+    blockSize: number;
+    digestLength: number;
     private readonly state: Int32Array;
     private readonly temp: Int32Array;
     private readonly buffer: Uint8Array;
-    private bufferLength: i32;
-    private bytesHashed: i32;
-    finished: bool = false
+    private bufferLength: number;
+    private bytesHashed: number;
+    finished: boolean = false
 
     // SHA-256 constants
-    static K: u64[] = [
+    static K: number[] = [
         0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5, 0x3956c25b,
         0x59f111f1, 0x923f82a4, 0xab1c5ed5, 0xd807aa98, 0x12835b01,
         0x243185be, 0x550c7dc3, 0x72be5d74, 0x80deb1fe, 0x9bdc06a7,
@@ -73,7 +73,7 @@ export class Hash {
 
     // Throws error when trying to update already finalized hash:
     // instance must be reset to use it again.
-    update(data: Uint8Array, dataLength: i32 = 0): Hash {
+    update(data: Uint8Array, dataLength: number = 0): Hash {
         if (dataLength == 0) {
             dataLength = data.length;
         }
@@ -81,7 +81,7 @@ export class Hash {
             throw new Error("SHA256: can't update because hash was finished.");
         }
 
-        let dataPos: i32 = 0;
+        let dataPos: number = 0;
         this.bytesHashed += dataLength;
         if (this.bufferLength > 0) {
             while (this.bufferLength < 64 && dataLength > 0) {
@@ -109,11 +109,11 @@ export class Hash {
     // If hash was already finalized, puts the same value.
     finish(out: Uint8Array): Hash {
         if (!this.finished) {
-            let bytesHashed: i32 = this.bytesHashed;
-            let left: i32 = this.bufferLength;
-            let bitLenHi: u32 = (bytesHashed / 0x20000000) | 0;
-            let bitLenLo: u32 = bytesHashed << 3;
-            let padLength: i32 = (bytesHashed % 64 < 56) ? 64 : 128;
+            let bytesHashed: number = this.bytesHashed;
+            let left: number = this.bufferLength;
+            let bitLenHi: number = (bytesHashed / 0x20000000) | 0;
+            let bitLenLo: number = bytesHashed << 3;
+            let padLength: number = (bytesHashed % 64 < 56) ? 64 : 128;
             this.buffer[left] = 0x80;
             for (let i = left + 1; i < padLength - 8; i++) {
                 this.buffer[i] = 0;
@@ -154,7 +154,7 @@ export class Hash {
     };
 
     // Internal function for use in HMAC for optimization.
-    _restoreState(from: Uint32Array, bytesHashed: i32): void {
+    _restoreState(from: Uint32Array, bytesHashed: number): void {
         for (let i = 0; i < this.state.length; i++) {
             this.state[i] = from[i];
         }
@@ -163,8 +163,8 @@ export class Hash {
         this.bufferLength = 0;
     };
 
-    static hashBlocks(w: Int32Array, v: Int32Array, p: Uint8Array, pos: i32, len: u64): i32 {
-        let a: i32, b: i32, c: i32, d: i32, e: i32, f: i32, g: i32, h: i32, u: i32, i: i8, j: i32, t1: i32, t2: i32;
+    static hashBlocks(w: Int32Array, v: Int32Array, p: Uint8Array, pos: number, len: number): number {
+        let a: number, b: number, c: number, d: number, e: number, f: number, g: number, h: number, u: number, i: number, j: number, t1: number, t2: number;
         while (len >= 64) {
             a = v[0];
             b = v[1];
@@ -176,10 +176,10 @@ export class Hash {
             h = v[7];
             for (i = 0; i < 16; i++) {
                 j = pos + i * 4;
-                let p1 = (((p[j] as i32) & 0xff) << 24);
-                let p2 = (((p[j + 1] as i32) & 0xff) << 16);
-                let p3 = (((p[j + 2] as i32) & 0xff) << 8);
-                let p4 = ((p[j + 3] as i32) & 0xff);
+                let p1 = ((p[j] & 0xff) << 24);
+                let p2 = ((p[j + 1] & 0xff) << 16);
+                let p3 = ((p[j + 2] & 0xff) << 8);
+                let p4 = (p[j + 3] & 0xff);
                 w[i] = p1 | p2 | p3 | p4;
             }
 
@@ -193,7 +193,7 @@ export class Hash {
             for (i = 0; i < 64; i++) {
                 t1 = (((((e >>> 6 | e << (32 - 6)) ^ (e >>> 11 | e << (32 - 11)) ^
                     (e >>> 25 | e << (32 - 25))) + ((e & f) ^ (~e & g))) | 0) +
-                    ((h + (((Hash.K[i] as i32) + w[i]) | 0)) | 0)) | 0;
+                    ((h + ((Hash.K[i] + w[i]) | 0)) | 0)) | 0;
                 t2 = (((a >>> 2 | a << (32 - 2)) ^ (a >>> 13 | a << (32 - 13)) ^
                     (a >>> 22 | a << (32 - 22))) + ((a & b) ^ (a & c) ^ (b & c))) | 0;
                 h = g;
@@ -224,8 +224,8 @@ export class Hash {
 export class HMAC {
     private inner: Hash
     private outer: Hash
-    blockSize: i32
-    digestLength: i32
+    blockSize: number
+    digestLength: number
     private readonly istate: Uint32Array
     private readonly ostate: Uint32Array
 
@@ -311,7 +311,7 @@ export function hash(data: Uint8Array): Uint8Array {
 }
 
 export function hashString(data: string): string {
-    return toHex(hash(Uint8Array.wrap(String.UTF8.encode(data))))
+    return toHex(hash(new TextEncoder().encode(data)));
 }
 
 // Returns HMAC-SHA256 of data under the key.
@@ -324,17 +324,15 @@ export function hmac(key: Uint8Array, data: Uint8Array): Uint8Array {
 
 export function toHex(byteArray: Uint8Array): string {
     let acc = '';
-    for(let i=0; i<byteArray.length; i++){
+    for (let i = 0; i < byteArray.length; i++) {
         let val = byteArray[i];
         acc += ('0' + val.toString(16)).slice(-2);
     }
     return acc;
-    //return byteArray.reduce((acc, val) => (acc + ('0' + val.toString(16)).slice(-2)), '');
 }
 
 export function hmacString(key: string, data: string): string {
-    const hash = hmac(
-        Uint8Array.wrap(String.UTF8.encode(key)),
-        Uint8Array.wrap(String.UTF8.encode(data)));
-    return toHex(hash)
+    const encoder = new TextEncoder();
+    const result = hmac(encoder.encode(key), encoder.encode(data));
+    return toHex(result);
 }

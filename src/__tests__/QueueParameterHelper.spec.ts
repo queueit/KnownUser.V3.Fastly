@@ -13,12 +13,12 @@ describe("parameter helper", () => {
         const queueitToken = 'ts_1480593661~cv_10~ce_false~q_944c1f44-60dd-4e37-aabc-f3e4bb1c8895~c_customerid~e_eventid~rt_disabled~h_218b734e-d5be-4b60-ad66-9b1b326266e2';
         let result = QueueParameterHelper.extractQueueParams(queueitToken);
 
-        expect(result).not.toBeNull('result should be parsed');
-        expect<i64>(result!.timeStamp).toBe(1480593661)
+        expect(result).not.toBeNull();
+        expect(result!.timeStamp).toBe(1480593661)
         expect(result!.eventId).toBe("eventid");
         expect(result!.cookieValidityMinutes).toBe(10);
         expect(result!.extendableCookie).toBeFalsy();
-        expect(result!.hashCode).toBe('218b734e-d5be-4b60-ad66-9b1b326266e2', 'hash should be extracted');
+        expect(result!.hashCode).toBe('218b734e-d5be-4b60-ad66-9b1b326266e2');
         expect(result!.queueITToken).toBe(queueitToken);
         expect(result!.queueITTokenWithoutHash).toBe('ts_1480593661~cv_10~ce_false~q_944c1f44-60dd-4e37-aabc-f3e4bb1c8895~c_customerid~e_eventid~rt_disabled');
     });

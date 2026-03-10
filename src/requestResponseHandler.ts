@@ -1,4 +1,3 @@
-import { Request, Response, Headers } from "@fastly/as-compute";
 import { KnownUser } from "./sdk/KnownUser";
 import { QueueITHelper } from "./helper";
 import { FastlyHttpContextProvider, getHttpHandler } from "./contextProvider";
@@ -13,18 +12,17 @@ import { Utils } from "./sdk/QueueITHelpers";
 const QUEUEIT_FAILED_HEADERNAME = "x-queueit-failed";
 let httpProvider: FastlyHttpContextProvider | null = null;
 
-export function onQueueITRequest(
+export async function onQueueITRequest(
   req: Request,
   conf: IntegrationDetails | null = null
-): Response | null {
+): Promise<Response | null> {
   if (conf == null) {
     conf = resolveIntegrationDetails();
   }
   if (conf == null) {
-    return new Response(String.UTF8.encode("No integration details found."), {
+    return new Response("No integration details found.", {
       headers: new Headers(),
       status: 404,
-      url: "",
     });
   }
 
@@ -35,7 +33,7 @@ export function onQueueITRequest(
   QueueITHelper.configureKnownUserHashing();
   httpProvider = getHttpHandler(req);
 
-  let integrationConfigJson = getIntegrationConfig(conf, integrationProvider);
+  let integrationConfigJson = await getIntegrationConfig(conf, integrationProvider);
   const requestUrl: string = conf.resolveWorkerRequestUrl(req.url);
 
   const queueItToken = Utils.getParameterByName(
@@ -66,7 +64,6 @@ export function onQueueITRequest(
       let response = new Response(null, {
         status: 200,
         headers: httpProvider!.getHttpResponse().getHeaders(),
-        url: "",
       });
       // In case of ajax call send the user to the queue by sending a custom queue-it header and redirecting user to queue from javascript
       response.headers.set("Access-Control-Expose-Headers", validationResult.getAjaxQueueRedirectHeaderKey());
@@ -82,7 +79,6 @@ export function onQueueITRequest(
       let response = new Response(null, {
         status: 302,
         headers: httpProvider!.getHttpResponse().getHeaders(),
-        url: "",
       });
       // Send the user to the queue - either because hash was missing or because is was invalid
       response.headers.set(
@@ -104,7 +100,6 @@ export function onQueueITRequest(
       let response = new Response(null, {
         status: 302,
         headers: httpProvider!.getHttpResponse().getHeaders(),
-        url: requestUrlWithoutToken,
       });
       response.headers.set("Location", requestUrlWithoutToken);
       Utils.addNoCacheHeaders(response);
@@ -123,15 +118,14 @@ export function onQueueITRequest(
 //Fill in the Queue-it headers
 export function onQueueITResponse(res: Response): void {
   const contextHeaders = httpProvider!.getHttpResponse().getHeaders();
-  const contextHeaderKeys = contextHeaders.keys();
 
   if (httpProvider!.isError) {
     res.headers.append(QUEUEIT_FAILED_HEADERNAME, "true");
   }
-  for (let i = 0; i < contextHeaderKeys.length; i++) {
-    if (contextHeaderKeys[i].length == 0) continue;
-    let value = contextHeaders.get(contextHeaderKeys[i]);
-    if (value != null && value!.length > 0)
-      res.headers.append(contextHeaderKeys[i], value!);
+  for (const key of contextHeaders.keys()) {
+    if (key.length == 0) continue;
+    const value = contextHeaders.get(key);
+    if (value != null && value.length > 0)
+      res.headers.append(key, value);
   }
 }

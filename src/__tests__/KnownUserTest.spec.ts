@@ -22,7 +22,7 @@ function resetMocks(): void {
     httpContextMock.reset();
 }
 
-function generateDebugToken(eventId: string, secretKey: string, expiredToken: bool = false): string {
+function generateDebugToken(eventId: string, secretKey: string, expiredToken: boolean = false): string {
     let timeStamp = Utils.getCurrentTime() + 3 * 60;
 
     if (expiredToken) {
@@ -71,7 +71,7 @@ describe('extendQueueCookie', () => {
 
         //Assert
         expect(userInQueueServiceMock.extendQueueCookieCall).toBeNull();
-        expect(exceptionWasThrown).toBeTruthy('error should be returned');
+        expect(exceptionWasThrown).toBeTruthy();
     });
 
     it('should handle InvalidCookieValidityMinutes', () => {
@@ -84,7 +84,7 @@ describe('extendQueueCookie', () => {
 
         //Assert
         expect(userInQueueServiceMock.extendQueueCookieCall).toBeNull();
-        expect(exceptionWasThrown).toBeTruthy('error should be returned');
+        expect(exceptionWasThrown).toBeTruthy();
     });
 
     it('should handle NullSecretKey', () => {
@@ -97,7 +97,7 @@ describe('extendQueueCookie', () => {
 
         //Assert
         expect(userInQueueServiceMock.extendQueueCookieCall).toBeNull();
-        expect(exceptionWasThrown).toBeTruthy('error should be returned');
+        expect(exceptionWasThrown).toBeTruthy();
     });
 
     it('Should extend', () => {
@@ -183,7 +183,7 @@ describe('validateRequestByIntegrationConfig', () => {
             httpContextMock);
 
         expect(result.first).not.toBeNull();
-        expect(result.first!.isAjaxResult).toBeFalsy('isAjaxResult should be false');
+        expect(result.first!.isAjaxResult).toBeFalsy();
         expect(result.second).toBeNull();
         expect(result.first!.eventId).toBe("eventidX");
         expect(userInQueueServiceMock.validateQueueRequestCall).not.toBeNull()
@@ -194,7 +194,7 @@ describe('validateRequestByIntegrationConfig', () => {
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.eventId).toBe("event1");
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.culture).toBe("");
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.layoutName).toBe("Christmas Layout by Queue-it");
-        expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.extendCookieValidity).toBeTruthy('cookie should be extended');
+        expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.extendCookieValidity).toBeTruthy();
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.cookieValidityMinute).toBe(20);
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.cookieDomain).toBe(".test.com");
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.version).toBe(3);
@@ -266,7 +266,7 @@ describe('validateRequestByIntegrationConfig', () => {
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.eventId).toBe('event1');
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.culture).toBe('');
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.layoutName).toBe('Christmas Layout by Queue-it');
-        expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.extendCookieValidity).toBeTruthy('cookie should be extended');
+        expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.extendCookieValidity).toBeTruthy();
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.cookieValidityMinute).toBe(20);
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.cookieDomain).toBe('.test.com');
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueConfig.version).toBe(3);
@@ -293,7 +293,7 @@ describe('validateRequestByIntegrationConfig', () => {
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", "queueIttoken", integrationConfigString, "customerid", "secretkey", httpContextMock);
 
         expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
-        expect(result.first!.doRedirect()).toBeFalsy('should not redirect');
+        expect(result.first!.doRedirect()).toBeFalsy();
     });
 
     it('should EmptyCurrentUrl', () => {
@@ -351,8 +351,8 @@ describe('validateRequestByIntegrationConfig', () => {
         const exceptionWasThrown = result.second != null && result.second!.message == "currentUrlWithoutQueueITToken can not be null or empty.";
 
         //Assert
-        expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull('validate queue request should not be called');
-        expect(exceptionWasThrown).toBeTruthy('exception should be returned');
+        expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
+        expect(exceptionWasThrown).toBeTruthy();
     });
 
     it('should not be called if integration config is empty', () => {
@@ -364,8 +364,8 @@ describe('validateRequestByIntegrationConfig', () => {
         const exceptionWasThrown = result.second != null && result.second!.message == "integrationsConfigString can not be null or empty.";
 
         //Assert
-        expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull('validate queue request should not be called');
-        expect(exceptionWasThrown).toBeTruthy('exception should be returned');
+        expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
+        expect(exceptionWasThrown).toBeTruthy();
     });
 
     it('should ForcedTargetUrl', () => {
@@ -631,7 +631,7 @@ describe('validateRequestByIntegrationConfig', () => {
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", "queueIttoken", integrationConfigString, "customerid", "secretkey", httpContextMock);
 
         expect(result.second).not.toBeNull()
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug header shouldn`t be added');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should CancelAction', () => {
@@ -930,7 +930,7 @@ describe('validateRequestByIntegrationConfig', () => {
             httpContextMock,
             dateTimeProviderMock);
 
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value;
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value;
         expect(actualCookieValue.indexOf("ServerUtcTime=" + expectedServerTime + "|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("ConfigVersion=3|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("PureUrl=http://test.com?event1=true|")).not.toBe(-1);
@@ -1010,21 +1010,21 @@ describe('validateRequestByIntegrationConfig', () => {
             httpContextMock,
             dateTimeProviderMock);
 
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeTruthy('Debug cookie key should be set')
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value
-        expect(actualCookieValue.indexOf("ConfigVersion=10")).not.toBe(-1, 'Should contain config version');
-        expect(actualCookieValue.indexOf("PureUrl=http://test.com?event1=true")).not.toBe(-1, 'Should have pureUrl');
-        expect(actualCookieValue.indexOf(queueitToken)).not.toBe(-1, 'Should contain QueueITToken');
-        expect(actualCookieValue.indexOf("OriginalUrl=http://test.com/?event1=true&queueittoken=queueittokenvalue")).not.toBe(-1, 'Should contain original url');
-        expect(actualCookieValue.indexOf("ServerUtcTime=" + expectedServerTime)).not.toBe(-1, 'Should contain serverUtcTime');
-        expect(actualCookieValue.indexOf("MatchedConfig=NULL")).not.toBe(-1, 'Should have MatchedConfig=NULL');
-        expect(actualCookieValue.indexOf("RequestIP=80.35.35.34")).not.toBe(-1, 'Should contain requestIp');
-        expect(actualCookieValue.indexOf("RequestHttpHeader_Via=1.1 example.com")).not.toBe(-1, 'Should contain via header');
-        expect(actualCookieValue.indexOf("RequestHttpHeader_Forwarded=for=192.0.2.60;proto=http;by=203.0.113.43")).not.toBe(-1, 'Should contain forwarded headers');
-        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedFor=129.78.138.66, 129.78.64.103")).not.toBe(-1, 'Should contain forwarded for headers');
-        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedHost=en.wikipedia.org:8080")).not.toBe(-1, 'Should contain forwarded host header');
-        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedProto=https")).not.toBe(-1, 'Should contain forwarded proto header');
-        expect(actualCookieValue.indexOf("SdkVersion=" + SDK_VERSION + "|")).not.toBe(-1, 'Should contain sdk version');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeTruthy()
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value
+        expect(actualCookieValue.indexOf("ConfigVersion=10")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("PureUrl=http://test.com?event1=true")).not.toBe(-1);
+        expect(actualCookieValue.indexOf(queueitToken)).not.toBe(-1);
+        expect(actualCookieValue.indexOf("OriginalUrl=http://test.com/?event1=true&queueittoken=queueittokenvalue")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("ServerUtcTime=" + expectedServerTime)).not.toBe(-1);
+        expect(actualCookieValue.indexOf("MatchedConfig=NULL")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestIP=80.35.35.34")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestHttpHeader_Via=1.1 example.com")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestHttpHeader_Forwarded=for=192.0.2.60;proto=http;by=203.0.113.43")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedFor=129.78.138.66, 129.78.64.103")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedHost=en.wikipedia.org:8080")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("RequestHttpHeader_XForwardedProto=https")).not.toBe(-1);
+        expect(actualCookieValue.indexOf("SdkVersion=" + SDK_VERSION + "|")).not.toBe(-1);
     });
 
     it('should NotValidHash_Debug', () => {
@@ -1076,7 +1076,7 @@ describe('validateRequestByIntegrationConfig', () => {
 
         KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true=", queueitToken, integrationConfigString, "customerId", secretKey, httpContextMock);
 
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value
 
         expect(actualCookieValue.indexOf("PureUrl=http://test.com?event1=true")).not.toBe(-1);
         expect(actualCookieValue.indexOf("ConfigVersion=3")).not.toBe(-1);
@@ -1100,12 +1100,12 @@ describe('validateRequestByIntegrationConfig', () => {
 
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", queueitToken, "{}", "customerId", secretKey, httpContextMock);
         const errorReturned = result.second != null && result.second!.message == 'integrationsConfigString can not be null or empty.';
-        assert(errorReturned);
+        expect(errorReturned).toBeTruthy();
 
         //Assert
         expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
 
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value
         expect(actualCookieValue.indexOf("ConfigVersion=NULL|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("PureUrl=http://test.com?event1=true|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("QueueitToken=" + queueitToken + "|")).not.toBe(-1);
@@ -1130,7 +1130,7 @@ describe('validateRequestByIntegrationConfig', () => {
         expect(result.second).toBeNull();
         expect(result.first).not.toBeNull();
         expect("https://api2.queue-it.net/diagnostics/connector/error/?code=setup").toBe(result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_Missing_SecretKey', () => {
@@ -1147,7 +1147,7 @@ describe('validateRequestByIntegrationConfig', () => {
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", queueitToken, integrationConfigString, "customerId", '', httpContextMock);
         //Assert
         expect("https://api2.queue-it.net/diagnostics/connector/error/?code=setup" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ExpiredToken', () => {
@@ -1164,7 +1164,7 @@ describe('validateRequestByIntegrationConfig', () => {
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", queueitToken, integrationConfigString, "customerId", secretKey, httpContextMock);
         //Assert
         expect("https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=timestamp" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ModifiedToken', () => {
@@ -1181,7 +1181,7 @@ describe('validateRequestByIntegrationConfig', () => {
         const result = KnownUser.validateRequestByIntegrationConfig("http://test.com?event1=true", queueitToken, integrationConfigString, "customerId", secretKey, httpContextMock);
         //Assert
         expect("https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=hash" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
 });
@@ -1229,7 +1229,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
         KnownUser.UserInQueueService = userInQueueServiceMock;
         const result = KnownUser.resolveQueueRequestByLocalConfig("targeturl", "queueIttoken", eventconfig, "customerid", "secretkey", httpContextMock);
 
-        expect(userInQueueServiceMock.validateQueueRequestCall).not.toBeNull('validateQueueRequest should be called');
+        expect(userInQueueServiceMock.validateQueueRequestCall).not.toBeNull();
         expect(userInQueueServiceMock.validateQueueRequestCall!.method).toBe('validateQueueRequest');
         expect(userInQueueServiceMock.validateQueueRequestCall!.targetUrl).toBe('targeturl');
         expect(userInQueueServiceMock.validateQueueRequestCall!.queueitToken).toBe('queueIttoken');
@@ -1399,13 +1399,13 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
             secretKey,
             httpContextMock,
             dateTimeProviderMock);
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value;
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value;
 
         expect(actualCookieValue.indexOf("QueueitToken=" + queueitToken)).not.toBe(-1);
         expect(actualCookieValue.indexOf("TargetUrl=http://test.com?event1=true")).not.toBe(-1);
         expect(actualCookieValue.indexOf("QueueitToken=" + queueitToken)).not.toBe(-1);
         expect(actualCookieValue.indexOf("OriginalUrl=http://test.com/?event1=true&queueittoken=queueittokenvalue")).not.toBe(-1);
-        expect(actualCookieValue.indexOf("ServerUtcTime=" + expectedServerTime)).not.toBe(-1, 'Should contain ' + "ServerUtcTime=" + expectedServerTime);
+        expect(actualCookieValue.indexOf("ServerUtcTime=" + expectedServerTime)).not.toBe(-1);
         expect(actualCookieValue.indexOf("RequestIP=80.35.35.34")).not.toBe(-1);
         expect(actualCookieValue.indexOf("RequestHttpHeader_Via=v")).not.toBe(-1);
         expect(actualCookieValue.indexOf("RequestHttpHeader_Forwarded=f")).not.toBe(-1);
@@ -1434,7 +1434,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
         //Assert
         expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
 
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value
         expect(actualCookieValue.indexOf("QueueConfig=NULL|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("OriginalUrl=http://test.com?event1=true|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("QueueitToken=" + queueitToken + "|")).not.toBe(-1);
@@ -1457,7 +1457,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
         const result = KnownUser.resolveQueueRequestByLocalConfig("http://test.com?event1=true", queueitToken, eventconfig, '', secretKey, httpContextMock);
         //Assert
         expect("https://api2.queue-it.net/diagnostics/connector/error/?code=setup" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_Missing_SecretKey', () => {
@@ -1476,7 +1476,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
 
         //Assert
         expect(result.first!.redirectUrl).toBe('https://api2.queue-it.net/diagnostics/connector/error/?code=setup');
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ExpiredToken', () => {
@@ -1496,7 +1496,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
 
         //Assert
         expect(result.first!.redirectUrl).toBe('https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=timestamp');
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ModifiedToken', () => {
@@ -1515,7 +1515,7 @@ describe('resolveQueueRequestByLocalEventConfig', () => {
 
         //Assert
         expect(result.first!.redirectUrl).toBe('https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=hash');
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Exception_NoDebugToken', () => {
@@ -1735,7 +1735,7 @@ describe('cancelRequestByLocalConfig', () => {
             httpContextMock,
             dateTimeProviderMock);
 
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value;
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value;
 
         expect(userInQueueServiceMock.validateCancelRequestCall!.method).toBe('validateCancelRequest');
         expect(userInQueueServiceMock.validateCancelRequestCall!.targetUrl).toBe('http://test.com?event1=true');
@@ -1776,7 +1776,7 @@ describe('cancelRequestByLocalConfig', () => {
         //Assert
         expect(userInQueueServiceMock.validateQueueRequestCall).toBeNull();
         expect(errorReturned).toBeTruthy();
-        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey).value;
+        const actualCookieValue = httpContextMock.res.cookies.get(KnownUser.QueueITDebugKey)!.value;
         expect(actualCookieValue.indexOf("CancelConfig=NULL|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("OriginalUrl=http://test.com?event1=true|")).not.toBe(-1);
         expect(actualCookieValue.indexOf("QueueitToken=" + queueitToken + "|")).not.toBe(-1);
@@ -1799,7 +1799,7 @@ describe('cancelRequestByLocalConfig', () => {
         const result = KnownUser.cancelRequestByLocalConfig("http://test.com?event1=true", queueitToken, cancelConfig, '', secretKey, httpContextMock);
         //Assert
         expect("https://api2.queue-it.net/diagnostics/connector/error/?code=setup" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_Missing_SecretKey', () => {
@@ -1817,7 +1817,7 @@ describe('cancelRequestByLocalConfig', () => {
         const result = KnownUser.cancelRequestByLocalConfig("http://test.com?event1=true", queueitToken, cancelConfig, "customerId", '', httpContextMock);
         //Assert
         expect("https://api2.queue-it.net/diagnostics/connector/error/?code=setup" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ExpiredToken', () => {
@@ -1835,7 +1835,7 @@ describe('cancelRequestByLocalConfig', () => {
         const result = KnownUser.cancelRequestByLocalConfig("http://test.com?event1=true", queueitToken, cancelConfig, "customerId", secretKey, httpContextMock);
         //Assert
         expect("https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=timestamp" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Debug_ModifiedToken', () => {
@@ -1853,7 +1853,7 @@ describe('cancelRequestByLocalConfig', () => {
         const result = KnownUser.cancelRequestByLocalConfig("http://test.com?event1=true", queueitToken, cancelConfig, "customerId", secretKey, httpContextMock);
         //Assert
         expect("https://customerId.api2.queue-it.net/customerId/diagnostics/connector/error/?code=hash" == result.first!.redirectUrl);
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 
     it('should Exception_NoDebugToken', () => {
@@ -1888,6 +1888,6 @@ describe('cancelRequestByLocalConfig', () => {
         const result = KnownUser.cancelRequestByLocalConfig("http://test.com?event1=true",
             "queueitToken", cancelEventconfig, "customerid", "secretKey", httpContextMock);
 
-        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy('debug cookie should not be set');
+        expect(httpContextMock.res.cookies.has(KnownUser.QueueITDebugKey)).toBeFalsy();
     });
 });

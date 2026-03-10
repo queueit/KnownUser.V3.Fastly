@@ -1,7 +1,6 @@
 build
 .idea
 node_modules
-**.wat
+bin/
 **.map
 **.tar.gz
-**.wasm

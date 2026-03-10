@@ -1,9 +1,34 @@
-# This file describes a Fastly Compute@Edge package. To learn more visit:
-# https://developer.fastly.com/reference/fastly-toml/
+# This file describes a Fastly Compute package. To learn more visit:
+# https://www.fastly.com/documentation/reference/compute/fastly-toml
 
 authors = ["your@email.com"]
 description = "Queue-it connector for Fastly"
-language = "assemblyscript"
-manifest_version = 1
+language = "javascript"
+manifest_version = 3
 name = "connector-fastly"
 service_id = "{YourServiceId}"
+
+[local_server]
+
+  [local_server.backends]
+
+    [local_server.backends."queue-it"]
+      url = "{YourQueueItBackendUrl}"
+
+    [local_server.backends.origin]
+      url = "{YourOriginUrl}"
+
+  [local_server.config_stores]
+
+    [local_server.config_stores.IntegrationConfiguration]
+      format = "inline-toml"
+
+      [local_server.config_stores.IntegrationConfiguration.contents]
+        customerId = "{YourCustomerId}"
+        apiKey = "{YourApiKey}"
+        secret = "{YourSecretKey}"
+        queueItOrigin = "queue-it"
+        workerHost = ""
+
+[scripts]
+  build = "npm run bundle"

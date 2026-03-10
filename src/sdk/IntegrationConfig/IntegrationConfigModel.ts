@@ -9,8 +9,8 @@ export class IntegrationConfigModel {
     CookieDomain: string = "";
     LayoutName: string = "";
     Culture: string = "";
-    ExtendCookieValidity: bool = false;
-    CookieValidityMinute: i64 = 0;
+    ExtendCookieValidity: boolean = false;
+    CookieValidityMinute: number = 0;
     QueueDomain: string = "";
     RedirectLogic: string = "";
     ForcedTargetUrl: string = "";
@@ -24,7 +24,7 @@ export class IntegrationConfigModel {
 
 export class CustomerIntegration {
     Integrations: Array<IntegrationConfigModel>;
-    Version: i64;
+    Version: number;
     Description: string;
 
     constructor() {
@@ -39,8 +39,8 @@ export class TriggerPart {
     Operator: string = "";
     ValueToCompare: string = "";
     ValuesToCompare: Array<string>;
-    IsNegative: bool = false;
-    IsIgnoreCase: bool = false;
+    IsNegative: boolean = false;
+    IsIgnoreCase: boolean = false;
     UrlPart: string = ""; // UrlValidator
     CookieName: string = ""; // CookieValidator
     HttpHeaderName: string = ""; // HttpHeaderValidator
