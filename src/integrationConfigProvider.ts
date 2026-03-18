@@ -1,4 +1,3 @@
-import { ConfigStore } from "fastly:config-store";
 import { RequestLogger } from "./helper";
 
 export async function getIntegrationConfig(
