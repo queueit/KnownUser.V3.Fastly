@@ -68,7 +68,13 @@ export class FastlyHttpRequest implements IHttpRequest {
         if (this.parsedCookieDic.size == 0) {
             this.parseCookies(this.getHeader('cookie'))
         }
-        return this.parsedCookieDic.has(cookieKey) ? decodeURIComponent(this.parsedCookieDic.get(cookieKey)!) : '';
+        if (!this.parsedCookieDic.has(cookieKey)) return '';
+        const cookieVal = this.parsedCookieDic.get(cookieKey)!;
+        try {
+            return decodeURIComponent(cookieVal);
+        } catch {
+            return cookieVal;
+        }
     }
 
     getHeader(name: string): string {

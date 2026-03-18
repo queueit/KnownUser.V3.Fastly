@@ -33,7 +33,11 @@ export class Utils {
     }
 
     static decodeUrl(url: string): string {
-        return decodeURIComponent(url);
+        try {
+            return decodeURIComponent(url);
+        } catch {
+            return url;
+        }
     }
 
     static generateSHA256Hash: (a: string, b: string) => string = (secretKey: string, stringToHash: string): string => "";
@@ -107,11 +111,15 @@ export class Utils {
         const regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)');
         const results = regex.exec(url);
         if (results === null) return '';
-        if (results.length < 3) {
+        if (results.length < 3 || results[2] === null || results[2] === undefined) {
             return '';
         }
 
-        return decodeURIComponent(results[2].replaceAll('+', ' '));
+        try {
+            return decodeURIComponent(results[2].replaceAll('+', ' '));
+        } catch {
+            return results[2];
+        }
     }
 
     static removeQueueItToken(url: string): string {
