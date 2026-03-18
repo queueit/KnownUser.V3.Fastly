@@ -1,6 +1,6 @@
 {
   "name": "@queue-it/fastly",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Queue-it connector for Fastly",
   "main": "src/index.ts",
   "author": "devs@queue-it.com",
