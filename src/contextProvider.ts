@@ -1,11 +1,11 @@
-import {IHttpContextProvider, IHttpRequest, IHttpResponse} from "./sdk/HttpContextProvider";
-import {decodeURIComponent, encodeURIComponent} from "./sdk/helpers/Uri";
+import { IConnectorContextProvider, IHttpRequest, IHttpResponse } from '@queue-it/connector-javascript';
+import { FastlyCryptoProvider } from './fastlyCryptoProvider';
 
 export function getHttpHandler(req: Request): FastlyHttpContextProvider {
     return new FastlyHttpContextProvider(req);
 }
 
-export class FastlyHttpContextProvider implements IHttpContextProvider {
+export class FastlyHttpContextProvider implements IConnectorContextProvider {
     isError: boolean = false;
     private readonly req: FastlyHttpRequest;
     private readonly res: FastlyHttpResponse;
@@ -21,6 +21,18 @@ export class FastlyHttpContextProvider implements IHttpContextProvider {
 
     getHttpResponse(): IHttpResponse {
         return this.res;
+    }
+
+    getCryptoProvider(): FastlyCryptoProvider {
+        return new FastlyCryptoProvider();
+    }
+
+    getEnqueueTokenProvider(): null {
+        return null;
+    }
+
+    getResponseHeaders(): Headers {
+        return (this.res as FastlyHttpResponse).getHeaders();
     }
 }
 
@@ -49,14 +61,6 @@ export class FastlyHttpRequest implements IHttpRequest {
             return;
         }
         this.bodyFetched = true;
-        const rawBody: ArrayBuffer | null = null; // this.context.req.arrayBuffer();
-        if (rawBody == null) {
-            return;
-        }
-        if (rawBody!.byteLength == 0) {
-            return;
-        }
-
         this.body = ''; // this.context.req.text()
     }
 
@@ -64,11 +68,11 @@ export class FastlyHttpRequest implements IHttpRequest {
         return this.baseReq.url;
     }
 
-    getCookieValue(cookieKey: string): string {
+    getCookieValue(cookieKey: string): string | undefined {
         if (this.parsedCookieDic.size == 0) {
             this.parseCookies(this.getHeader('cookie'))
         }
-        if (!this.parsedCookieDic.has(cookieKey)) return '';
+        if (!this.parsedCookieDic.has(cookieKey)) return undefined;
         const cookieVal = this.parsedCookieDic.get(cookieKey)!;
         try {
             return decodeURIComponent(cookieVal);
@@ -110,7 +114,7 @@ export class FastlyHttpResponse implements IHttpResponse {
         this.headers = new Headers();
     }
 
-    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: number): void {
+    setCookie(cookieName: string, cookieValue: string, domain: string, expiration: number, _isHttpOnly: boolean, _isSecure: boolean): void {
         const expirationDate = new Date(expiration * 1000);
         let setCookieString = cookieName + "=" + encodeURIComponent(cookieValue) + "; expires=" + expirationDate.toUTCString() + ";";
         if (domain != "") {
