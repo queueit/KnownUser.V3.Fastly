@@ -1,5 +1,7 @@
 # KnownUser.V3.Fastly
 
+**This is not the most recent version. In order to obtain access to the most recent version, please contact your local Queue-it representative or Queue-it Support**
+
 The Queue-it Security Framework ensures that end-users are not able to access your online application without first
 going through the queue for any and all `protected` areas and paths on your sites. The queue system is implemented by
 adding a server-side (request-level) integration that protects your online application by redirecting users to a waiting
